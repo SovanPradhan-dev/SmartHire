@@ -1,14 +1,46 @@
-import React from 'react'
-const footer = () => {
-  return (
-    <div className="bg-black w-full h-14 text-white rounded border border-white text-center items-center flex justify-around p-4 space-x-4 fixed bottom-0">
-      <p>All rights reserved</p>
-      <p>© 2025 Smart Hire</p>
-      <p>Privacy Policy</p>
-      <p>Terms of Service</p>
-      <p>Contact Us</p>
-    </div>
-  )
-}
+import React from "react";
+import { useNavigate } from "react-router-dom";
 
-export default footer
+const Footer = () => {
+  const navigate = useNavigate();
+
+  return (
+    <footer
+      className="fixed bottom-0 w-full h-14 bg-black
+                 border-t border-green-500
+                 text-gray-300 flex items-center justify-between
+                 px-6 text-sm
+                 shadow-[0_-2px_20px_rgba(34,197,94,0.3)]"
+    >
+      {/* LEFT */}
+      <span>
+        © 2025 <span className="text-green-400 font-semibold">Smart Hire</span>
+      </span>
+
+      {/* CENTER */}
+      <span className="hidden md:block">
+        All rights reserved
+      </span>
+
+      {/* RIGHT LINKS */}
+      <div className="flex space-x-5">
+        {[
+          { label: "Privacy", path: "/privacy" },
+          { label: "Terms", path: "/terms" },
+          { label: "Contact", path: "/contact" },
+        ].map((item) => (
+          <button
+            key={item.label}
+            onClick={() => navigate(item.path)}
+            className="hover:text-green-400 transition
+                       hover:drop-shadow-[0_0_6px_rgba(34,197,94,0.8)]"
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;
