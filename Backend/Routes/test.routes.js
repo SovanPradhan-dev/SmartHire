@@ -1,13 +1,13 @@
 import express from "express";
-import Question from "../Model/test.model.js"; // 👈 make sure .js extension is included
-import auth from "../Middleware/auth.js"; // 👈 auth middleware
-import Score from "../Model/score.model.js"; // 👈 Score model
+import Question from "../Model/test.model.js"; 
+import auth from "../Middleware/auth.js";
+import Score from "../Model/score.model.js"; 
 
 const router = express.Router();
 
 router.get("/questions", async (req, res) => {
   try {
-    const questions = await Question.aggregate([{ $sample: { size: 5 } }]); // 👈 fetch 5 random docs
+    const questions = await Question.aggregate([{ $sample: { size: 5 } }]); 
     res.json(questions);
   } catch (err) {
     console.error("Error fetching questions:", err);

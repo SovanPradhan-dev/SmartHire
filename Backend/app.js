@@ -5,9 +5,13 @@ import connectDB from "./config/dbconnection.js";
 import questionRoutes from "./Routes/test.routes.js";
 import userRouter from "./Routes/user.routes.js" ;
 import compilerRoutes from "./Routes/compiler.route.js" ;
+import dns from "dns"; 
+
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+dns.setServers(['1.1.1.1', '8.8.8.8']);
 
 app.use(cors());
 app.use(express.json());
