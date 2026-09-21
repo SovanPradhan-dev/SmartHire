@@ -1,5 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import ProfileMenu from "./ProfileMenu";
+
 
 const Nav = () => {
   const navigate = useNavigate();
@@ -51,25 +53,11 @@ const Nav = () => {
       </div>
 
       {/* Right side */}
+      
       <div className="flex items-center space-x-4">
         {user ? (
-          <>
-            <span className="text-gray-300">
-              Hi, <span className="text-white font-medium">{user.username}</span>
-            </span>
-
-            <button
-              onClick={handleLogout}
-              className="
-                bg-red-600 hover:bg-red-700
-                transition
-                text-white px-3 py-1 rounded
-                shadow-[0_0_8px_rgba(239,68,68,0.7)]
-              "
-            >
-              Logout
-            </button>
-          </>
+          // <><header className="flex h-16 items-center justify-end bg-[#0b1220] px-6">
+      <ProfileMenu />
         ) : (
           <>
             <button

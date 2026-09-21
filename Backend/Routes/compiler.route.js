@@ -25,7 +25,6 @@ router.post("/run", async (req, res) => {
   }
 
   try {
-    /* 1️⃣ CREATE RUNNER */
     const createRes = await axios.post(
       "https://paiza-io.p.rapidapi.com/runners/create",
       {
@@ -47,7 +46,6 @@ router.post("/run", async (req, res) => {
       return res.status(500).json({ error: "Failed to create runner" });
     }
 
-    /* 2️⃣ POLL STATUS */
     let status = "running";
     let attempts = 0;
 

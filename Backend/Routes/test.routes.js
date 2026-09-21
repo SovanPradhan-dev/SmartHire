@@ -17,7 +17,6 @@ router.get("/questions", async (req, res) => {
 router.post("/submit", auth, async (req, res) => {
   const { score } = req.body;
 
-  // for now just log it
   console.log("User score:", score);
   const newsScore = new Score({
     userId: req.user.userId,
@@ -28,7 +27,6 @@ router.post("/submit", auth, async (req, res) => {
   res.json({ message: "Score received" });
 });
 
-// 🔥 Leaderboard
 router.get("/leaderboard", async (req, res) => {
   try {
     const leaderboard = await Score.find()
