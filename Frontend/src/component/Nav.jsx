@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import ProfileMenu from "./ProfileMenu";
-
+// import jwt_decode from "jwt-decode";
 
 const Nav = () => {
   const navigate = useNavigate();
@@ -57,7 +57,7 @@ const Nav = () => {
       <div className="flex items-center space-x-4">
         {user ? (
           // <><header className="flex h-16 items-center justify-end bg-[#0b1220] px-6">
-      <ProfileMenu />
+      <ProfileMenu handleLogout={handleLogout} />
         ) : (
           <>
             <button

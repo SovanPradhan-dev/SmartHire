@@ -10,11 +10,15 @@ import {
   ChevronRight,
   Camera,
 } from "lucide-react";
+// import jwt_decode from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 
-export default function ProfileMenu() {
+
+export default function ProfileMenu(props) {
   const [open, setOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
   const menuRef = useRef(null);
+  const navigate = useNavigate();
 
   // Close when clicking outside
   useEffect(() => {
@@ -187,20 +191,20 @@ export default function ProfileMenu() {
             <MenuItem
               icon={<HelpCircle size={21} />}
               label="Help & Support"
-              onClick={() => console.log("Help")}
+              onClick={() => navigate("/contact")}
             />
 
             <MenuItem
               icon={<FileText size={21} />}
               label="Terms & Privacy"
-              onClick={() => console.log("Terms")}
+              onClick={() => navigate("/about")}
             />
 
             <div className="my-2 border-t border-white/10" />
 
             {/* Logout */}
             <button
-              onClick={() => console.log("Logout")}
+              onClick={props.handleLogout}
               className="
                 flex w-full items-center gap-4
                 rounded-xl px-4 py-3

@@ -1,7 +1,7 @@
 import express from "express";
 import userModel from "../Model/user.model.js";
 import jwt from "jsonwebtoken";
-
+import authController from "../Controller/auth.controller.js";
 const router = express.Router();
 
 router.post("/signup", async (req, res) => {
@@ -36,6 +36,6 @@ router.post("/signin", async (req, res) => {
     }
   });
 });
-
+router.post("/google/signin", authController.googleSignIn);
 export default router;
 

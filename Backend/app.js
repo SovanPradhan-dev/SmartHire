@@ -2,8 +2,8 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/dbconnection.js";
-import questionRoutes from "./Routes/test.routes.js";
-import userRouter from "./Routes/user.routes.js" ;
+import questionRoutes from "./Routes/test.route.js";
+import userRouter from "./Routes/user.route.js" ;
 import compilerRoutes from "./Routes/compiler.route.js" ;
 import dns from "dns"; 
 
@@ -23,6 +23,5 @@ app.use(express.json());
 app.use("/api", questionRoutes);
 app.use("/code", compilerRoutes ) ;
 app.use("/user", userRouter ) ; 
-
 app.listen(PORT, () => console.log(` Server running on port ${PORT}`));
 connectDB();
