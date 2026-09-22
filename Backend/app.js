@@ -6,15 +6,34 @@ import questionRoutes from "./Routes/test.route.js";
 import userRouter from "./Routes/user.route.js" ;
 import compilerRoutes from "./Routes/compiler.route.js" ;
 import dns from "dns"; 
+import session from "express-session";
+import passport from "./config/passport.js";
 
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+    })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+
 dns.setServers(['1.1.1.1', '8.8.8.8']);
 
 app.use(cors());
 app.use(express.json());
+
+
+
+
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());

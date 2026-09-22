@@ -1,8 +1,17 @@
 import express from "express";
 import userModel from "../Model/user.model.js";
 import jwt from "jsonwebtoken";
-import authController from "../Controller/auth.controller.js";
+import router from "express"
+import {
+    googleLogin,
+    googleCallback
+} from "../Controller/Auth.controller.js";
+
 const router = express.Router();
+
+router.get("/google", googleLogin);
+
+router.get("/google/callback", googleCallback);
 
 router.post("/signup", async (req, res) => {
   const { username, email, password } = req.body;
