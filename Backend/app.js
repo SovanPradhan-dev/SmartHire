@@ -5,6 +5,7 @@ import connectDB from "./config/dbconnection.js";
 import questionRoutes from "./Routes/test.routes.js";
 import userRouter from "./Routes/user.routes.js" ;
 import compilerRoutes from "./Routes/compiler.route.js" ;
+import ftofRoute from "./Routes/ftof.routes.js"
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use("/api", questionRoutes);
 app.use("/code", compilerRoutes ) ;
 app.use("/user", userRouter ) ; 
+app.use("/inter",ftofRoute)
 
 app.listen(PORT, () => console.log(` Server running on port ${PORT}`));
 connectDB();

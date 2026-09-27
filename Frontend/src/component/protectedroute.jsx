@@ -1,14 +1,13 @@
 import { Navigate } from "react-router-dom";
 
 const ProtectedRoute = ({ children }) => {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const token = localStorage.getItem("token");
 
-  if (!token) {
+  if (!token || token === "undefined" || token === "null") {
     return <Navigate to="/signin" replace />;
   }
 
   return children;
 };
 
-export default ProtectedRoute;
+export default ProtectedRoute; 

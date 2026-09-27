@@ -1,57 +1,171 @@
 import Editor from "@monaco-editor/react";
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const Compiler = () => {
   const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
   const [language, setLanguage] = useState("python");
-  const [Loading,setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [randomQuestion, setRandomQuestion] = useState("");
+
+  // Array Questions
+  const questions = [
+    "Find the largest element in an array",
+    "Find the smallest element in an array",
+    "Find the second largest element in an array",
+    "Find the second smallest element in an array",
+    "Find sum of all elements in an array",
+    "Find average of array elements",
+    "Count even and odd numbers in an array",
+    "Find maximum and minimum element",
+    "Reverse an array",
+    "Print array elements in reverse order",
+    "Check if array is sorted or not",
+    "Copy one array into another",
+    "Merge two arrays",
+    "Find frequency of each element in an array",
+    "Count occurrences of a given number",
+    "Find duplicate elements in an array",
+    "Remove duplicates from array",
+    "Find missing number in array",
+    "Find common elements in two arrays",
+    "Find intersection of two arrays"
+  ];
+
+  // Get Random Question
+  const getRandomQuestion = () => {
+    const randomIndex = Math.floor(Math.random() * questions.length);
+    setRandomQuestion(questions[randomIndex]);
+  };
+
+  // Load one random question on page load
+  useEffect(() => {
+    getRandomQuestion();
+  }, []);
 
   const runCode = () => {
-  setLoading(true);
+    setLoading(true);
 
-  axios
-    .post("http://localhost:3000/code/run", {
-      code,
-      language,
-      input: "5\n10"
-    })
-    .then((res) => {
-      setOutput(res.data.output);
-    })
-    .catch(() => {
-      setOutput("Execution failed");
-    })
-    .finally(() => {
-      setLoading(false);
-    });
-};
+    axios
+      .post("http://localhost:3000/code/run", {
+        code,
+        language,
+        input: "5\n10",
+      })
+      .then((res) => {
+        setOutput(res.data.output);
+      })
+      .catch(() => {
+        setOutput("❌ Execution failed");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
 
   return (
-    <div className="h-100% bg-black">
-      <select onChange={(e) => setLanguage(e.target.value)}>
-        <option value="python">Python</option>
-        <option value="cpp">C++</option>
-        <option value="javascript">JavaScript</option>
-      </select>
+    <div className="min-h-screen bg-[#050505] text-white flex items-center justify-center p-6">
+      <div
+        className="w-full max-w-5xl bg-[#0d0d0d]/70 backdrop-blur-xl 
+        border border-cyan-500/20 rounded-2xl p-6
+        shadow-[0_0_40px_rgba(0,255,255,0.08)]"
+      >
+        {/* Header */}
+        <div className="flex justify-between items-center mb-4">
+          <h1
+            className="text-xl font-bold 
+            bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 
+            bg-clip-text text-transparent"
+          >
+            ⚡ Online Compiler
+          </h1>
 
-      <Editor
-        height="300px"
-        language={language}
-        value={code}
-        onChange={setCode}
-        theme="hc-black"
+          {/* Language Selector */}
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="bg-black border border-gray-700 px-3 py-1 rounded text-sm
+            focus:outline-none focus:border-cyan-400"
+          >
+            <option value="python">Python</option>
+            <option value="cpp">C++</option>
+            <option value="javascript">JavaScript</option>
+          </select>
+        </div>
 
-      />
-      <button onClick={runCode} className="ml-2 text-green-300 rounded p-1 border-white"> {Loading ? "Running" : "▶ Run"} </button>
-      <pre className="bg-black text-white h-64 overflow-auto px-6 text-white">{Loading ? <button disabled type="button" class="inline-flex items-center text-body bg-neutral-primary-soft border border-default hover:bg-neutral-secondary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none">
-<svg aria-hidden="true" role="status" class="w-4 h-4 me-2 text-fg-brand animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB"/>
-<path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor"/>
-</svg>
-Loading...
-</button> : output} </pre>
+        {/* Random Question Box */}
+        <div className="mb-5 p-4 rounded-xl border border-purple-500/30 bg-black/40">
+          <div className="flex justify-between items-center gap-4">
+            <div>
+              <p className="text-gray-400 text-sm">
+                Random DSA Question
+              </p>
+
+              <h2 className="text-lg text-cyan-300 font-medium mt-1">
+                {randomQuestion}
+              </h2>
+            </div>
+
+            <button
+              onClick={getRandomQuestion}
+              className="px-4 py-2 rounded-lg font-semibold
+              bg-gradient-to-r from-pink-500 to-purple-500
+              hover:opacity-90 transition"
+            >
+              🎲 Random
+            </button>
+          </div>
+        </div>
+
+        {/* Editor */}
+        <div className="rounded-lg overflow-hidden border border-gray-800">
+          <Editor
+            height="350px"
+            language={language}
+            value={code}
+            onChange={(value) => setCode(value || "")}
+            theme="vs-dark"
+          />
+        </div>
+
+        {/* Run Button */}
+        <div className="flex justify-end mt-4">
+          <button
+            onClick={runCode}
+            disabled={loading}
+            className="px-6 py-2 rounded-lg font-semibold
+            bg-gradient-to-r from-cyan-500 to-purple-500
+            hover:opacity-90 transition
+            shadow-[0_0_20px_rgba(0,255,255,0.3)]
+            disabled:opacity-50"
+          >
+            {loading ? "Running..." : "▶ Run Code"}
+          </button>
+        </div>
+
+        {/* Output */}
+        <div className="mt-6">
+          <h2 className="text-sm text-gray-400 mb-2">
+            Output
+          </h2>
+
+          <pre
+            className="bg-black/80 border border-gray-800 
+            rounded-lg p-4 h-56 overflow-auto text-green-400
+            shadow-inner"
+          >
+            {loading ? (
+              <div className="flex items-center gap-2 text-cyan-400">
+                <div className="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+                Running code...
+              </div>
+            ) : (
+              output || "Run your code to see output..."
+            )}
+          </pre>
+        </div>
+      </div>
     </div>
   );
 };

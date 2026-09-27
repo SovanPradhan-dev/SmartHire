@@ -11,6 +11,29 @@ router.post("/signup", async (req, res) => {
   res.status(201).json({ message: "User registered" });
 });
 
+router.get("/profile", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ message: "No token provided" });
+
+  try {
+    const decoded = jwt.verify(authHeader.split(" ")[1], process.env.JWT_SECRET);
+    const user = await userModel.findById(decoded.userId).select("username email phone quizScore interviewsAttended performanceRating -_id");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+  } catch (error) {
+    res.status(401).json({ message: "Invalid token" });
+  }
+});
+
+router.get("/users", async (req, res) => {
+    const users = await userModel
+      .find()
+      .select("username email -_id");
+
+    res.status(200).json(users);
+})
+
+
 router.post("/signin", async (req, res) => {
   const { email, password } = req.body;
 
