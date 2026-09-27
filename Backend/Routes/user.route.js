@@ -1,8 +1,17 @@
 import express from "express";
 import userModel from "../Model/user.model.js";
 import jwt from "jsonwebtoken";
+import router from "express"
+import {
+    googleLogin,
+    googleCallback
+} from "../Controller/Auth.controller.js";
 
 const router = express.Router();
+
+router.get("/google", googleLogin);
+
+router.get("/google/callback", googleCallback);
 
 router.post("/signup", async (req, res) => {
   const { username, email, password } = req.body;
@@ -46,7 +55,7 @@ router.post("/signin", async (req, res) => {
   const token = jwt.sign(
   { userId: user._id },
   process.env.JWT_SECRET,
-  { expiresIn: "1h" }
+  { expiresIn: "5m" }
 );
 
 
@@ -59,6 +68,6 @@ router.post("/signin", async (req, res) => {
     }
   });
 });
-
+router.post("/google/signin", authController.googleSignIn);
 export default router;
 
