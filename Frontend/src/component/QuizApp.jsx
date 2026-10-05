@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 
-const QUIZ_TIME = 300; // 5 minutes
-const STORAGE_KEY = "quiz_progress";
+const QUIZ_TIME = 150;
+const MAX_VIOLATIONS = 3;
 
 const QuizApp = () => {
   const [questions, setQuestions] = useState([]);
+  const [quizStarted, setQuizStarted] = useState(false);
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
   const [selected, setSelected] = useState("");
@@ -16,43 +17,52 @@ const QuizApp = () => {
   const violationCount = useRef(0);
   const hasSubmitted = useRef(false);
 
-  const MAX_VIOLATIONS = 3;
-
-  /* ---------------- FETCH QUESTIONS + RESTORE STATE ---------------- */
+  /* ---------------- FETCH QUESTIONS ---------------- */
   useEffect(() => {
-    axios
-      .get("http://localhost:3000/api/questions")
-      .then((res) => {
-        setQuestions(res.data);
+    const token = localStorage.getItem("token");
 
-        const saved = sessionStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const data = JSON.parse(saved);
-          setCurrent(data.current);
-          setScore(data.score);
-          setTimeLeft(data.timeLeft);
-          violationCount.current = data.violations || 0;
-        }
+    if (!token) {
+      console.error("No token found");
+      return;
+    }
+
+    axios
+      .get("http://localhost:3000/api/questions", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       })
-      .catch((err) => console.error(err));
+      .then((res) => setQuestions(res.data))
+      .catch((err) =>
+        console.error("API Error:", err.response?.data || err.message)
+      );
   }, []);
 
-  /* ---------------- PERSIST STATE ---------------- */
-  useEffect(() => {
-    if (!quizFinished) {
-      sessionStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({
-          current,
-          score,
-          timeLeft,
-          violations: violationCount.current,
-        })
-      );
-    }
-  }, [current, score, timeLeft, quizFinished]);
+  /* ---------------- START QUIZ ---------------- */
+  const startQuiz = () => {
+    setQuizStarted(true);
+  };
 
-  /* ---------------- SUBMIT SCORE (SAFE) ---------------- */
+  /* ---------------- TIMER ---------------- */
+  useEffect(() => {
+    if (!quizStarted || quizFinished) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          submitScore(score);
+          setQuizFinished(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [quizStarted, quizFinished, score]);
+
+  /* ---------------- SUBMIT SCORE ---------------- */
   const submitScore = async (finalScore) => {
     if (hasSubmitted.current) return;
     hasSubmitted.current = true;
@@ -63,52 +73,20 @@ const QuizApp = () => {
       await axios.post(
         "http://localhost:3000/api/submit",
         { score: finalScore },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
     } catch (err) {
-      console.error("Score submit failed", err);
+      console.error("Submit error:", err);
     }
   };
 
-  /* ---------------- RESET QUIZ (REATTEMPT) ---------------- */
-  const resetQuiz = () => {
-    sessionStorage.removeItem(STORAGE_KEY);
-
-    violationCount.current = 0;
-    hasSubmitted.current = false;
-
-    setCurrent(0);
-    setScore(0);
-    setSelected("");
-    setShowAnswer(false);
-    setQuizFinished(false);
-    setTimeLeft(QUIZ_TIME);
-  };
-
-  /* ---------------- TIMER ---------------- */
+  /* ---------------- ANTI CHEAT ---------------- */
   useEffect(() => {
-    if (quizFinished) return;
-
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          alert("⏰ Time is up! Quiz auto-submitted.");
-          submitScore(score);
-          sessionStorage.removeItem(STORAGE_KEY);
-          setQuizFinished(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [quizFinished, score]);
-
-  /* ---------------- ANTI-CHEATING ---------------- */
-  useEffect(() => {
-    if (quizFinished) return;
+    if (!quizStarted || quizFinished) return;
 
     const registerViolation = (reason) => {
       violationCount.current += 1;
@@ -118,9 +96,7 @@ const QuizApp = () => {
       );
 
       if (violationCount.current >= MAX_VIOLATIONS) {
-        alert("❌ Quiz terminated due to suspicious activity.");
         submitScore(score);
-        sessionStorage.removeItem(STORAGE_KEY);
         setQuizFinished(true);
       }
     };
@@ -133,48 +109,33 @@ const QuizApp = () => {
       registerViolation("Window focus lost");
     };
 
-    const handleBeforeUnload = (e) => {
-      e.preventDefault();
-      e.returnValue = "";
-    };
-
     const detectDevTools = setInterval(() => {
       if (
         window.outerWidth - window.innerWidth > 160 ||
         window.outerHeight - window.innerHeight > 160
       ) {
-        registerViolation("Developer tools detected");
+        registerViolation("DevTools detected");
       }
     }, 1000);
 
-    const blockActions = (e) => e.preventDefault();
-
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("blur", handleBlur);
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    document.addEventListener("contextmenu", blockActions);
-    document.addEventListener("copy", blockActions);
-    document.addEventListener("cut", blockActions);
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("blur", handleBlur);
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      document.removeEventListener("contextmenu", blockActions);
-      document.removeEventListener("copy", blockActions);
-      document.removeEventListener("cut", blockActions);
       clearInterval(detectDevTools);
     };
-  }, [quizFinished, score]);
+  }, [quizStarted, quizFinished, score]);
 
-  /* ---------------- ANSWER HANDLING ---------------- */
-  const handleAnswer = (option) => {
+  /* ---------------- ANSWER ---------------- */
+  const handleAnswer = (opt) => {
     if (showAnswer || quizFinished) return;
 
-    setSelected(option);
+    setSelected(opt);
     setShowAnswer(true);
 
-    if (option === questions[current].answer) {
+    if (opt === questions[current].answer) {
       setScore((prev) => prev + 1);
     }
   };
@@ -187,78 +148,94 @@ const QuizApp = () => {
       setShowAnswer(false);
     } else {
       submitScore(score);
-      sessionStorage.removeItem(STORAGE_KEY);
       setQuizFinished(true);
     }
   };
 
-  /* ---------------- TIME FORMAT ---------------- */
-  const formatTime = (seconds) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}:${s < 10 ? "0" : ""}${s}`;
-  };
-
-  /* ---------------- UI ---------------- */
-  if (questions.length === 0)
-    return <img src="/Loading.gif" className="m-auto mt-20 h-20" alt="Loading" />;
-
-  if (quizFinished)
+  /* ---------------- LOADING ---------------- */
+  if (questions.length === 0) {
     return (
-      <div className="quiz-container">
-        <h2>Quiz Finished</h2>
-        <h3>
-          Your Score: {score}/{questions.length}
-        </h3>
-        <p className="text-red-400 mt-2">
-          Violations: {violationCount.current}/{MAX_VIOLATIONS}
-        </p>
+      <p className="text-black text-center mt-20">Loading questions...</p>
+    );
+  }
 
-        <button
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
-          onClick={resetQuiz}
-        >
-          🔁 Reattempt Quiz
-        </button>
+  /* ---------------- START SCREEN ---------------- */
+  if (!quizStarted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+        <div className="p-8 border border-cyan-500 text-center rounded-xl">
+          <h1 className="text-3xl mb-4 text-cyan-400">Quiz Challenge</h1>
+          <p className="mb-6 text-gray-400">
+            ⏱ {QUIZ_TIME}s | ⚠ Max Violations: {MAX_VIOLATIONS}
+          </p>
+
+          <button
+            onClick={startQuiz}
+            className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-500 rounded"
+          >
+            Start Quiz
+          </button>
+        </div>
       </div>
     );
+  }
 
-  const currentQuestion = questions[current];
-
-  return (
-    <div className="quiz-container">
-      <div className="timer">
-        ⏱ Time Left: <strong>{formatTime(timeLeft)}</strong>
+  /* ---------------- FINISHED ---------------- */
+  if (quizFinished) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black text-white text-center">
+        <div>
+          <h2 className="text-2xl mb-4">Quiz Finished</h2>
+          <p>
+            Score: {score}/{questions.length}
+          </p>
+          <p className="text-red-400 mt-2">
+            Violations: {violationCount.current}/{MAX_VIOLATIONS}
+          </p>
+        </div>
       </div>
+    );
+  }
 
-      <h2>
-        Q{current + 1}. {currentQuestion.question}
-      </h2>
+  const q = questions[current];
 
-      <ul>
-        {currentQuestion.options.map((opt, i) => (
-          <li
-            key={i}
-            className={`option 
-              ${selected === opt
-                ? opt === currentQuestion.answer
-                  ? "correct"
-                  : "wrong"
-                : ""}
-              ${showAnswer && opt === currentQuestion.answer ? "highlight" : ""}
-            `}
-            onClick={() => handleAnswer(opt)}
+  /* ---------------- QUIZ UI ---------------- */
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-black text-white px-4">
+      <div className="w-full max-w-2xl border border-purple-500 p-6 rounded-xl">
+
+        <div className="flex justify-between mb-4">
+          <span>
+            Q {current + 1}/{questions.length}
+          </span>
+          <span className="text-cyan-400">⏱ {timeLeft}s</span>
+        </div>
+
+        <h2 className="mb-6">{q.question}</h2>
+
+        <div className="space-y-3">
+          {q.options.map((opt, i) => (
+            <div
+              key={i}
+              onClick={() => handleAnswer(opt)}
+              className={`p-3 border rounded cursor-pointer ${
+                selected === opt ? "border-green-400" : "border-gray-700"
+              }`}
+            >
+              {opt}
+            </div>
+          ))}
+        </div>
+
+        {showAnswer && (
+          <button
+            onClick={nextQuestion}
+            className="mt-6 w-full py-2 bg-purple-600 rounded"
           >
-            {opt}
-          </li>
-        ))}
-      </ul>
-
-      {showAnswer && (
-        <button onClick={nextQuestion}>
-          {current < questions.length - 1 ? "Next Question" : "Finish Quiz"}
-        </button>
-      )}
+            Next
+          </button>
+        )}
+      </div>
     </div>
   );
 };

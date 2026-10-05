@@ -1,15 +1,11 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 const testSchema = new mongoose.Schema({
   category: String,
   question: String,
   options: [String],
   answer: String,
-  explanation: String,
-  user : {
-    type : mongoose.Schema.Types.ObjectId ,
-    ref : 'User'
-  }
+  explanation: String
 });
 
 const TestModel = mongoose.model("testmodel", testSchema , 'questions');

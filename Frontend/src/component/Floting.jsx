@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 const steps = [
   {
     path: "/interview",
+    label: "Interview",
     icon: (
       <path
         stroke="currentColor"
@@ -16,6 +17,7 @@ const steps = [
   },
   {
     path: "/quiz",
+    label: "Quiz",
     icon: (
       <path
         stroke="currentColor"
@@ -27,7 +29,21 @@ const steps = [
     ),
   },
   {
+    path: "/voice",
+    label: "Voice",
+    icon: (
+      <path
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M12 3v10m0 0a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v4a3 3 0 0 0 3 3Zm5 0v2a5 5 0 0 1-10 0v-2m5 7v3"
+      />
+    ),
+  },
+  {
     path: "/compiler",
+    label: "Compiler",
     icon: (
       <path
         stroke="currentColor"
@@ -45,50 +61,61 @@ const Floating = () => {
   const { pathname } = useLocation();
 
   return (
-  <ol className="flex flex-col items-center
-  fixed right-6 top-1/2 -translate-y-1/2
-  bg-black/50 p-4 rounded-2xl
-  shadow-lg z-50 space-y-6 text-white border border-white"
->
-  {steps.map((step, index) => {
-    const isActive = pathname === step.path;
-    const isLast = index === steps.length - 1;
+    <ol
+      className="flex flex-col items-center
+      fixed right-6 top-1/2 -translate-y-1/2
+      bg-black/60 backdrop-blur-md p-4 rounded-2xl
+      shadow-lg z-50 space-y-6 text-white border border-white"
+    >
+      {steps.map((step, index) => {
+        const isActive = pathname === step.path;
+        const isLast = index === steps.length - 1;
 
-    return (
-      <li key={step.path} className="flex flex-col items-center">
-        <button
-          onClick={() => navigate(step.path)}
-          className={`flex items-center justify-center
-            w-10 h-10 lg:w-12 lg:h-12 rounded-full
-            transition-all duration-200
-            ${
-              isActive
-                ? "bg-brand-softer text-fg-brand ring-2 ring-brand-subtle"
-                : "bg-neutral-tertiary text-body hover:bg-neutral-secondary"
-            }
-          `}
-        >
-          <svg
-            className="w-5 h-5"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            {step.icon}
-          </svg>
-        </button>
+        return (
+          <li key={step.path} className="flex flex-col items-center group">
+            
+            {/* Button */}
+            <button
+              onClick={() => navigate(step.path)}
+              title={step.label}
+              className={`flex items-center justify-center
+                w-10 h-10 lg:w-12 lg:h-12 rounded-full
+                transition-all duration-300
+                ${
+                  isActive
+                    ? "bg-cyan-400 text-black shadow-[0_0_15px_cyan]"
+                    : "bg-gray-800 text-white hover:bg-gray-700"
+                }
+              `}
+            >
+              <svg
+                className="w-5 h-5"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                {step.icon}
+              </svg>
+            </button>
 
-        {!isLast && (
-          <span
-            className={`w-1 h-8 my-2 rounded-full transition-colors
-              ${isActive ? "bg-brand-subtle" : "bg-default"}
-            `}
-          />
-        )}
-      </li>
-    );
-  })}
-</ol>
-    );
-}
+            {/* Label on hover */}
+            <span className="absolute right-16 opacity-0 group-hover:opacity-100 transition text-sm bg-black px-2 py-1 rounded border border-gray-600">
+              {step.label}
+            </span>
+
+            {/* Connector line */}
+            {!isLast && (
+              <span
+                className={`w-1 h-8 my-2 rounded-full transition-colors
+                  ${isActive ? "bg-cyan-400" : "bg-gray-600"}
+                `}
+              />
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  );
+};
+
 export default Floating;

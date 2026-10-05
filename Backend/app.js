@@ -8,6 +8,8 @@ import userRouter from "./Routes/user.route.js" ;
 import compilerRoutes from "./Routes/compiler.route.js" ;
 import dns from "dns"; 
 
+import ftofRoute from "./Routes/ftof.routes.js"
+dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -28,5 +30,7 @@ app.use(express.json());
 app.use("/api", questionRoutes);
 app.use("/code", compilerRoutes ) ;
 app.use("/user", userRouter ) ; 
+app.use("/inter",ftofRoute)
+
 app.listen(PORT, () => console.log(` Server running on port ${PORT}`));
 connectDB();

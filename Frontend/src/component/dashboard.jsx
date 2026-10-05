@@ -12,33 +12,59 @@ const Leaderboard = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-black text-white flex justify-center items-start pt-16">
-      <div className="w-[600px] bg-[#111] p-6 rounded-xl shadow-lg">
-        <h2 className="text-2xl font-bold text-center mb-6">
-          🏆 Leaderboard
+    <div className="min-h-screen bg-[#050505] text-white flex justify-center items-start pt-20 px-4">
+      
+      {/* Card */}
+      <div className="w-full max-w-2xl bg-[#0d0d0d]/80 backdrop-blur-xl border border-cyan-500/20 rounded-2xl shadow-[0_0_40px_rgba(0,255,255,0.1)] p-6">
+
+        {/* Title */}
+        <h2 className="text-3xl font-bold text-center mb-8 
+          bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 
+          bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(0,255,255,0.6)]">
+          ⚡ Leaderboard
         </h2>
 
         {data.length === 0 ? (
-          <p className="text-center text-gray-400">No scores yet</p>
+          <p className="text-center text-gray-500">
+            No scores yet
+          </p>
         ) : (
-          <table className="w-full border-collapse">
+          <table className="w-full border-separate border-spacing-y-2">
+            
+            {/* Head */}
             <thead>
-              <tr className="border-b border-gray-700 text-gray-400">
-                <th className="py-2 text-left">Rank</th>
-                <th className="py-2 text-left">User</th>
-                <th className="py-2 text-right">Score</th>
+              <tr className="text-gray-400 text-sm uppercase tracking-wider">
+                <th className="text-left px-3">#</th>
+                <th className="text-left px-3">User</th>
+                <th className="text-right px-3">Assessment</th>
+                <th className="text-right px-3">Interview</th>
               </tr>
             </thead>
+
+            {/* Body */}
             <tbody>
               {data.map((item, index) => (
                 <tr
                   key={item._id}
-                  className="border-b border-gray-800 hover:bg-[#1a1a1a]"
+                  className="bg-[#111]/70 border border-cyan-500/10 rounded-lg 
+                  hover:scale-[1.02] hover:border-cyan-400/40 
+                  hover:shadow-[0_0_15px_rgba(0,255,255,0.3)] 
+                  transition-all duration-300"
                 >
-                  <td className="py-3">{index + 1}</td>
-                  <td className="py-3">{item.userId.username}</td>
-                  <td className="py-3 text-right font-semibold">
+                  <td className="py-3 px-3 font-semibold text-cyan-400">
+                    {index + 1}
+                  </td>
+
+                  <td className="py-3 px-3">
+                    {item.userId.username}
+                  </td>
+
+                  <td className="py-3 px-3 text-right font-semibold text-purple-400">
                     {item.score}
+                  </td>
+
+                  <td className="py-3 px-3 text-right font-semibold text-pink-400">
+                    {item.score_inter}
                   </td>
                 </tr>
               ))}

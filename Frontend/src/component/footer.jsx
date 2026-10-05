@@ -14,7 +14,7 @@ const Footer = () => {
     >
       {/* LEFT */}
       <span>
-        © 2025 <span className="text-green-400 font-semibold">Smart Hire</span>
+        © 2026 <span className="text-green-400 font-semibold">Smart Hire</span>
       </span>
 
       {/* CENTER */}
