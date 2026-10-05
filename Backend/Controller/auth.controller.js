@@ -1,5 +1,3 @@
-// Controller/auth.controller.js
-
 import { OAuth2Client } from "google-auth-library";
 
 const client = new OAuth2Client(
@@ -8,110 +6,63 @@ const client = new OAuth2Client(
     process.env.GOOGLE_REDIRECT_URI
 );
 
-
-// ==========================================
-// 1. Start Google OAuth
-// ==========================================
-0
 export const googleLogin = (req, res) => {
-    try {
-        const authUrl = client.generateAuthUrl({
-            access_type: "offline",
 
-            scope: [
-                "openid",
-                "email",
-                "profile"
-            ],
+    const authUrl = client.generateAuthUrl({
+        access_type: "offline",
 
-            prompt: "consent"
-        });
+        scope: [
+            "openid",
+            "email",
+            "profile"
+        ],
 
-        res.redirect(authUrl);
+        redirect_uri: process.env.GOOGLE_REDIRECT_URI
+    });
 
-    } catch (error) {
-        console.error("Google login error:", error);
+    console.log(authUrl);
 
-        res.status(500).json({
-            message: "Unable to start Google authentication"
-        });
-    }
+    res.redirect(authUrl);
 };
 
 
-// ==========================================
-// 2. Google OAuth Callback
-// ==========================================
-
 export const googleCallback = async (req, res) => {
+
     try {
 
         const { code } = req.query;
 
-        // Make sure Google returned a code
+        console.log("Authorization code:", code);
+
         if (!code) {
             return res.status(400).json({
                 message: "Authorization code not received"
             });
         }
 
+        const { tokens } = await client.getToken({
+            code,
+            redirect_uri: process.env.GOOGLE_REDIRECT_URI
+        });
 
-        // ======================================
-        // Exchange authorization code for tokens
-        // ======================================
-
-        const { tokens } = await client.getToken(code);
+        console.log("Tokens:", tokens);
 
         client.setCredentials(tokens);
-
-
-        console.log("Google tokens received");
-
-
-        // ======================================
-        // Get Google user information
-        // ======================================
 
         const response = await client.request({
             url: "https://openidconnect.googleapis.com/v1/userinfo"
         });
 
-
-        const googleUser = response.data;
-
-
-        console.log("Google User:");
-        console.log(googleUser);
-
-
-        // ======================================
-        // Extract required information
-        // ======================================
-
-        const user = {
-            id: googleUser.sub,
-            name: googleUser.name,
-            email: googleUser.email,
-            picture: googleUser.picture
-        };
-
-
-        // ======================================
-        // Send user information
-        // ======================================
+        console.log("Google user:", response.data);
 
         res.json({
             message: "Google authentication successful",
-            user
+            user: response.data
         });
-
 
     } catch (error) {
 
-        console.error(
-            "Google authentication error:",
-            error.response?.data || error.message
-        );
+        console.error(error);
 
         res.status(500).json({
             message: "Google authentication failed"

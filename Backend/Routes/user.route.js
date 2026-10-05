@@ -1,7 +1,7 @@
 import express from "express";
 import userModel from "../Model/user.model.js";
 import jwt from "jsonwebtoken";
-import router from "express"
+// import {googleLogin,googleCallback} from "../Controller/Auth.controller.js"
 import {
     googleLogin,
     googleCallback
@@ -45,6 +45,6 @@ router.post("/signin", async (req, res) => {
     }
   });
 });
-router.post("/google/signin", authController.googleSignIn);
+// router.post("/google/signin", authController.googleSignIn);
 export default router;
 
