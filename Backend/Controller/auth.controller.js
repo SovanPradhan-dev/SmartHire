@@ -96,10 +96,18 @@ export const googleCallback = async (req, res) => {
         googleId: googleUser.sub,
         picture: googleUser.picture,
       });
-    } else if (!user.googleId) {
-      user.googleId = googleUser.sub;
-      if (!user.picture && googleUser.picture) user.picture = googleUser.picture;
-      await user.save();
+    } else {
+      let changed = false;
+      if (!user.googleId) {
+        user.googleId = googleUser.sub;
+        changed = true;
+      }
+      // Backfill/refresh Google picture so Nav + Profile always show it
+      if (googleUser.picture && user.picture !== googleUser.picture) {
+        user.picture = googleUser.picture;
+        changed = true;
+      }
+      if (changed) await user.save();
     }
 
     if (!process.env.JWT_SECRET) {

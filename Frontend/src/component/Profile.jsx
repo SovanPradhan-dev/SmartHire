@@ -5,24 +5,49 @@ const Profile = () => {
   const [currUser, setCurrUser] = useState(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setCurrUser(JSON.parse(storedUser));
-    } else {
-      axios
-        .get("http://localhost:3000/user/profile", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        })
-        .then((response) => {
-          setCurrUser(response.data);
-        })
-        .catch((error) => {
-          console.error("Error fetching user profile:", error);
-        });
+    const token = localStorage.getItem("token");
+    let storedUser = null;
+    try {
+      storedUser = JSON.parse(localStorage.getItem("user"));
+    } catch {
+      storedUser = null;
     }
+
+    // If cached user already has a picture, show it immediately,
+    // then refresh in background. Otherwise fetch fresh profile
+    // (handles users who logged in before picture support was added).
+    if (storedUser?.picture) {
+      setCurrUser(storedUser);
+    }
+
+    if (!token) {
+      if (storedUser && !storedUser.picture) setCurrUser(storedUser);
+      return;
+    }
+
+    axios
+      .get("http://localhost:3000/user/profile", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        const fresh = response.data;
+        setCurrUser(fresh);
+        // Refresh cache so Nav/ProfileMenu avatars pick up Google picture
+        localStorage.setItem("user", JSON.stringify(fresh));
+      })
+      .catch((error) => {
+        console.error("Error fetching user profile:", error);
+        if (storedUser && !storedUser.picture) setCurrUser(storedUser);
+      });
   }, []);
+
+  const displayName =
+    currUser?.username || currUser?.name || currUser?.email?.split("@")[0] || "User";
+  const avatarUrl =
+    currUser?.picture ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=0D8ABC&color=fff`;
 
   return (
     <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-lg">
@@ -30,14 +55,14 @@ const Profile = () => {
         
         {/* Profile Image */}
         <img
-          src="https://ui-avatars.com/api/?name=Student"
-          alt="Profile"
-          className="w-32 h-32 rounded-full border-4 border-blue-500"
+          src={avatarUrl}
+          alt={displayName}
+          className="w-32 h-32 rounded-full border-4 border-blue-500 object-cover"
         />
 
         {/* User Info */}
         <div className="flex-1">
-          <h2 className="text-3xl font-bold">{currUser?.name}</h2>
+          <h2 className="text-3xl font-bold">{displayName}</h2>
           <p className="text-gray-600">B.Tech CSE (Data Science)</p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">

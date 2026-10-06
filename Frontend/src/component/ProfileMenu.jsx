@@ -19,7 +19,19 @@ export default function ProfileMenu(props) {
   const [darkMode, setDarkMode] = useState(true);
   const menuRef = useRef(null);
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user"));
+  const storedUser = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user")) || {};
+    } catch {
+      return {};
+    }
+  })();
+  const displayName =
+    storedUser.username || storedUser.name || storedUser.email?.split("@")[0] || "User";
+  const displayEmail = storedUser.email || "";
+  const avatarUrl =
+    storedUser.picture ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=0D8ABC&color=fff`;
   // Close when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -44,13 +56,13 @@ export default function ProfileMenu(props) {
         className="flex items-center gap-3 rounded-xl p-1.5 transition hover:bg-white/10"
       >
         <img
-          src="/profile.jpg"
-          alt="Profile"
+          src={avatarUrl}
+          alt={displayName}
           className="h-10 w-10 rounded-full object-cover border border-white/20"
         />
 
         <span className="hidden text-sm font-medium text-white md:block">
-          Sovan Pradhan
+          {displayName}
         </span>
 
         <ChevronRight
@@ -80,8 +92,8 @@ export default function ProfileMenu(props) {
 
             <div className="relative">
               <img
-                src="/profile.jpg"
-                alt="Sovan Pradhan"
+                src={avatarUrl}
+                alt={displayName}
                 className="
                   h-20 w-20 rounded-full
                   object-cover
@@ -107,11 +119,11 @@ export default function ProfileMenu(props) {
 
             <div>
               <h2 className="text-lg font-semibold text-white">
-                Sovan Pradhan
+                {displayName}
               </h2>
 
               <p className="mt-1 text-sm text-gray-400">
-                sovan.pradhan@seple.com
+                {displayEmail}
               </p>
 
               <span
@@ -139,7 +151,10 @@ export default function ProfileMenu(props) {
               icon={<User size={21} />}
               label="View Profile"
               active
-              onClick={() => console.log("Profile")}
+              onClick={() => {
+                setOpen(false);
+                navigate("/profile");
+              }}
             />
 
             <MenuItem

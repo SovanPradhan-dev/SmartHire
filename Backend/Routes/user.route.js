@@ -26,7 +26,7 @@ router.get("/profile", async (req, res) => {
 
   try {
     const decoded = jwt.verify(authHeader.split(" ")[1], process.env.JWT_SECRET);
-    const user = await userModel.findById(decoded.userId).select("username email phone quizScore interviewsAttended performanceRating -_id");
+    const user = await userModel.findById(decoded.userId).select("username email phone picture googleId quizScore interviewsAttended performanceRating -_id");
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json(user);
   } catch (error) {
@@ -64,7 +64,8 @@ router.post("/signin", async (req, res) => {
     user: {
       id: user._id,
       username: user.username,
-      email: user.email
+      email: user.email,
+      picture: user.picture || null
     }
   });
 });
