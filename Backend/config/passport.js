@@ -1,3 +1,7 @@
+// DEPRECATED: Passport Google flow is not used.
+// Canonical flow is the manual google-auth-library implementation in
+// Controller/Auth.controller.js mounted at /user/google + /user/google/callback.
+// This file is kept only for reference and is intentionally not imported in app.js.
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 

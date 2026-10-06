@@ -19,7 +19,7 @@ export default function ProfileMenu(props) {
   const [darkMode, setDarkMode] = useState(true);
   const menuRef = useRef(null);
   const navigate = useNavigate();
-
+  const user = JSON.parse(localStorage.getItem("user"));
   // Close when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {

@@ -1,13 +1,25 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 
 const Signin = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const googleError = searchParams.get("error");
+    if (googleError) {
+      setError(`Google sign-in failed: ${googleError}`);
+    }
+  }, [searchParams]);
+
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:3000/user/google";
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -81,6 +93,20 @@ const Signin = () => {
             className="bg-green-600 hover:bg-green-700 transition text-white py-2 rounded font-medium"
           >
             Create New Account
+          </button>
+
+          <div className="flex items-center gap-2 my-1">
+            <div className="h-px flex-1 bg-gray-700" />
+            <span className="text-gray-500 text-sm">or</span>
+            <div className="h-px flex-1 bg-gray-700" />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="bg-white hover:bg-gray-200 transition text-gray-900 py-2 rounded font-medium"
+          >
+            Continue with Google
           </button>
         </form>
       </div>

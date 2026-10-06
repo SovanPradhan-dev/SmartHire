@@ -1,5 +1,12 @@
 {
+  "scripts": {
+    "start": "concurrently \"npm start --prefix Backend\" \"npm run dev --prefix Frontend\"",
+    "dev": "nodemon app.js"
+  },
   "dependencies": {
     "jwt-decode": "^4.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5"
   }
 }

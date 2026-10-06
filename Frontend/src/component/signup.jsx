@@ -23,6 +23,10 @@ const Signup = () => {
     setStrength(checkStrength(pwd));
   };
 
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:3000/user/google";
+  };
+
   // 🚀 Signup + Auto Login
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -122,6 +126,20 @@ const Signup = () => {
             className="bg-blue-600 hover:bg-blue-700 transition text-white py-2 rounded font-medium"
           >
             Already have an account? Sign In
+          </button>
+
+          <div className="flex items-center gap-2 my-1">
+            <div className="h-px flex-1 bg-gray-700" />
+            <span className="text-gray-500 text-sm">or</span>
+            <div className="h-px flex-1 bg-gray-700" />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="bg-white hover:bg-gray-200 transition text-gray-900 py-2 rounded font-medium"
+          >
+            Continue with Google
           </button>
         </form>
       </div>

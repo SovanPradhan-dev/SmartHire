@@ -19,6 +19,7 @@ import Floting from "./component/floting.jsx";
 import Voice from "./component/Voice.jsx"
 import Testing from "./component/testing.jsx"
 import Profile from "./component/Profile.jsx";
+import AuthCallback from "./component/AuthCallback.jsx";
 function App() {
   return (
     <>
@@ -27,6 +28,7 @@ function App() {
         <Route path="/" element={<><Division/><Floting></Floting><LandingPage /><Footer /></>} />
         <Route path="/signin" element={<Signin />} />
         <Route path="/signup" element={<Signup />}  />
+        <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/about" element={<About />} />
         <Route path="/features" element={<Features />} />
         <Route path="/contact" element={<Contact />} />
